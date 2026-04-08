@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Street Performers Tip
 
-## Getting Started
+**Street Performers Tip** is a web app for **fan tips to street performers and musicians**. Payments run through **Stripe** (Checkout + Connect). The public product name matches `BUSINESS_NAME` in `src/lib/config.ts` — use the **same** customer-facing name and statement descriptor in your Stripe account (e.g. `STREET PERFORMERS TIP`).
 
-First, run the development server:
+## Stripe verification (business website)
+
+Stripe requires a URL that is **public**, **not password-protected**, and **matches the business name** you gave Stripe.
+
+1. In **Stripe Dashboard → Business settings**, set your **business name**, **DBA**, or customer-facing name to align with **Street Performers Tip** (same branding as this site).
+2. Submit your **deployed app URL** — the site shows **Street Performers Tip** in the header and footer.
+3. If you use a **GitHub repo** as the URL, the repo must be **public** and this README must describe the product clearly.
+
+**Contact (optional but helpful):** add a way to reach you (email in README or GitHub profile) so reviewers see a legitimate project.
+
+## Features
+
+- App Router + TypeScript + Tailwind CSS
+- Mobile-first tipping page at `/limona`
+- Reusable artist model (future multi-artist SaaS ready)
+- Stripe Checkout Session API at `/api/checkout`
+- Stripe Connect transfer to connected account with 2% platform fee
+
+## Setup
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Create environment file:
+
+```bash
+cp .env.example .env.local
+```
+
+3. Add your Stripe key in `.env.local`:
+
+```bash
+STRIPE_SECRET_KEY=sk_test_...
+```
+
+4. Start the app:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**Home `/`:** In development (`next dev`), `/` shows the **first artist** in your catalog (`src/lib/artists.ts`). In production, `/` uses `DEFAULT_ARTIST_SLUG` in `src/lib/config.ts`. To mimic “first artist on `/`” after `next build` when running `next start` locally, set `MUSICTIP_HOME_FIRST_ARTIST=true` in `.env.local` (see `.env.example`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+You can also open a specific artist at `/limona` (or any slug you add).
