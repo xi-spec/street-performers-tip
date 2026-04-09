@@ -64,16 +64,20 @@ export function TipForm({ artistSlug, artistName, tipDescription }: TipFormProps
         }),
       });
 
+      const data = (await response.json()) as { url?: string; error?: string };
+
       if (!response.ok) {
-        setError("Unable to create checkout. Please try again.");
+        setError(
+          data.error ?? "Unable to create checkout. Please try again.",
+        );
         setIsSubmitting(false);
         return;
       }
 
-      const data = (await response.json()) as { url?: string };
-
       if (!data.url) {
-        setError("Missing checkout URL. Please try again.");
+        setError(
+          data.error ?? "Missing checkout URL. Please try again.",
+        );
         setIsSubmitting(false);
         return;
       }

@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "start:first": "MUSICTIP_HOME_FIRST_ARTIST=true next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "deploy:preview": "npx vercel --yes"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^6.1.0",

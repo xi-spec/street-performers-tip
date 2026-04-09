@@ -7,6 +7,7 @@ import {
   MIN_TIP_AMOUNT_CENTS,
   PLATFORM_FEE_PERCENTAGE,
 } from "@/lib/config";
+import Stripe from "stripe";
 import { getStripeClient } from "@/lib/stripe";
 
 type CheckoutPayload = {
@@ -75,7 +76,17 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ url: session.url });
-  } catch {
+  } catch (error) {
+    console.error("[api/checkout]", error);
+
+    if (error instanceof Stripe.errors.StripeError) {
+      return NextResponse.json({ error: error.message }, { status: 502 });
+    }
+
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
     return NextResponse.json(
       { error: "Unable to create checkout session." },
       { status: 500 },
