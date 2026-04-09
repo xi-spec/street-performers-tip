@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getArtistBySlug } from "@/lib/artists";
-import { DEFAULT_ARTIST_SLUG } from "@/lib/config";
 import { getStripeClient } from "@/lib/stripe";
 
 type SuccessPageProps = {
@@ -29,7 +28,10 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
   const isPaid = session.payment_status === "paid";
 
   const sessionArtistSlug = session.metadata?.artistSlug;
-  const artist = getArtistBySlug(sessionArtistSlug ?? DEFAULT_ARTIST_SLUG);
+  const artist =
+    sessionArtistSlug !== undefined && sessionArtistSlug !== ""
+      ? getArtistBySlug(sessionArtistSlug)
+      : undefined;
   const artistName = artist?.name ?? "the artist";
   const successDescription =
     artist?.successDescription ??
@@ -75,10 +77,10 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
       </section>
 
       <Link
-        href={`/${artist?.slug ?? DEFAULT_ARTIST_SLUG}`}
+        href={artist ? `/${artist.slug}` : "/"}
         className="mt-6 inline-flex h-12 items-center justify-center rounded-xl bg-zinc-900 px-4 text-base font-semibold text-white hover:bg-zinc-800"
       >
-        Tip again
+        {artist ? "Tip again" : "Back to home"}
       </Link>
     </main>
   );

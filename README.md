@@ -46,6 +46,4 @@ STRIPE_SECRET_KEY=sk_test_...
 npm run dev
 ```
 
-**Home `/`:** In development (`next dev`), `/` shows the **first artist** in your catalog (`src/lib/artists.ts`). In production, `/` uses `DEFAULT_ARTIST_SLUG` in `src/lib/config.ts`. To mimic “first artist on `/`” after `next build` when running `next start` locally, set `MUSICTIP_HOME_FIRST_ARTIST=true` in `.env.local` (see `.env.example`).
-
-You can also open a specific artist at `/limona` (or any slug you add).
+**Home `/`:** Does not show a tip form — only short copy plus links to each artist at `/{slug}` (e.g. `/limona`). The success page resolves the artist from Stripe session `metadata.artistSlug` only.

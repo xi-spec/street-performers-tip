@@ -6,7 +6,6 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "start:first": "MUSICTIP_HOME_FIRST_ARTIST=true next start",
     "lint": "eslint",
     "deploy:preview": "npx vercel --yes"
   },

@@ -8,9 +8,6 @@ export const BUSINESS_NAME = "Street Performers Tip";
 export const BUSINESS_TAGLINE =
   "Tips for street performers and musicians. Payments are processed securely with Stripe.";
 
-/** Slug for the artist shown at the site root `/` (no redirect). */
-export const DEFAULT_ARTIST_SLUG = "limona";
-
 export const PLATFORM_FEE_PERCENTAGE = 0.02;
 
 export const CURRENCY = "eur" as const;
