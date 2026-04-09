@@ -16,9 +16,7 @@ type TipFormProps = {
 };
 
 export function TipForm({ artistSlug, artistName, tipDescription }: TipFormProps) {
-  const [selectedAmountCents, setSelectedAmountCents] = useState<number>(
-    SUPPORTED_TIP_AMOUNTS_CENTS[1],
-  );
+  const [selectedAmountCents, setSelectedAmountCents] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>("");
@@ -35,7 +33,9 @@ export function TipForm({ artistSlug, artistName, tipDescription }: TipFormProps
   }, [customAmount, selectedAmountCents]);
 
   const isValidAmount =
-    Number.isFinite(finalAmountCents) && finalAmountCents >= MIN_TIP_AMOUNT_CENTS;
+    typeof finalAmountCents === "number" &&
+    Number.isFinite(finalAmountCents) &&
+    finalAmountCents >= MIN_TIP_AMOUNT_CENTS;
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -99,10 +99,10 @@ export function TipForm({ artistSlug, artistName, tipDescription }: TipFormProps
                 setCustomAmount("");
                 setSelectedAmountCents(amountCents);
               }}
-              className={`h-14 rounded-xl border text-lg font-semibold transition ${
+              className={`h-14 rounded-xl border-2 text-lg font-semibold transition ${
                 isSelected
-                  ? "border-black bg-black text-white"
-                  : "border-zinc-300 bg-white text-zinc-900"
+                  ? "border-amber-400 bg-black text-white shadow-[0_0_0_2px_rgba(251,191,36,0.25)]"
+                  : "border-zinc-300 bg-white text-zinc-900 hover:border-zinc-400"
               }`}
             >
               {CURRENCY_SYMBOL}

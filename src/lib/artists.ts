@@ -1,16 +1,47 @@
+export type ArtistKnowMoreLink = {
+  label: string;
+  href: string;
+};
+
 export type Artist = {
   slug: string;
   name: string;
   stripeAccountId: string;
   tipDescription: string;
+  /** Optional custom message shown on the success page after payment. */
+  successDescription?: string;
+  /** Optional links for the post-payment “Know me” section. */
+  knowMoreLinks?: ArtistKnowMoreLink[];
 };
 
 const artists: Artist[] = [
   {
     slug: "limona",
     name: "Limona Li",
-    stripeAccountId: "acct_xxx",
+    stripeAccountId: "acct_1TK20YEmzF4KvREU",
     tipDescription: "Support the music with a quick tip. Thank you for your support!",
+    successDescription:
+      "Your support helps keep Limona Li's music journey moving forward.",
+    knowMoreLinks: [
+      {
+        label: "Spotify",
+        href: "https://open.spotify.com/artist/2QGHezEju3FdiTM5ZSMSvb",
+      },
+      {
+        label: "Instagram",
+        href: "https://www.instagram.com/limona.li/",
+      },
+
+      {
+        label: "TikTok",
+        href: "https://www.tiktok.com/@limona.li",
+      },
+
+      {
+        label: "YouTube",
+        href: "https://www.youtube.com/channel/UCycPWnHecFBoLGFg9qbMvOw",
+      },
+      ],
   },
 ];
 
