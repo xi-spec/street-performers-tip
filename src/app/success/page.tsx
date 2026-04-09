@@ -35,7 +35,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
   const artistName = artist?.name ?? "the artist";
   const successDescription =
     artist?.successDescription ??
-    `Your support helps keep ${artistName}'s music journey moving forward.`;
+    `Your support helps keep ${artistName}'s performance journey moving forward.`;
   const knowMoreLinks = artist?.knowMoreLinks ?? [];
 
   return (
@@ -51,10 +51,9 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
         </p>
       </section>
 
-      <section className="mt-6 rounded-2xl border border-zinc-300 bg-zinc-50 p-6">
-        <h2 className="text-xl font-semibold text-zinc-950">Know me</h2>
-
-        {knowMoreLinks.length > 0 ? (
+      {knowMoreLinks.length > 0 ? (
+        <section className="mt-6 rounded-2xl border border-zinc-300 bg-zinc-50 p-6">
+          <h2 className="text-xl font-semibold text-zinc-950">Know me</h2>
           <ul className="mt-4 space-y-2">
             {knowMoreLinks.map((linkItem) => (
               <li key={linkItem.href}>
@@ -69,12 +68,8 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
               </li>
             ))}
           </ul>
-        ) : (
-          <p className="mt-3 text-sm text-zinc-700">
-            Social links and deeper artist story will be added here.
-          </p>
-        )}
-      </section>
+        </section>
+      ) : null}
 
       <Link
         href={artist ? `/${artist.slug}` : "/"}

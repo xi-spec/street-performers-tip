@@ -45,15 +45,6 @@ const artists: Artist[] = [
       },
       ],
   },
-  {
-    slug: "test",
-    name: "test",
-    stripeAccountId: "acct_1TK20YEmzF4KvREU",
-    tipDescription: "Support the music with a quick tip. Thank you for your support!",
-    successDescription:
-      "Your support helps keep test's music journey moving forward.",
-  
-  },
 ];
 
 export function addArtist(artist: Artist): void {
