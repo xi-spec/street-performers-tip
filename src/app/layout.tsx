@@ -32,19 +32,19 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-        <header className="border-b border-zinc-200 bg-white px-4 py-3">
+      <body className="min-h-full flex flex-col font-sans">
+        <header className="border-b border-zinc-200/70 bg-white/85 px-5 py-4 backdrop-blur-md supports-[backdrop-filter]:bg-white/70">
           <Link
             href="/"
-            className="inline-block max-w-full text-center text-base font-semibold leading-snug tracking-tight text-zinc-900 sm:text-left sm:text-lg"
+            className="inline-block max-w-full text-[15px] font-semibold tracking-tight text-zinc-900 transition-colors hover:text-blue-600 sm:text-left sm:text-base"
           >
             {BUSINESS_NAME}
           </Link>
         </header>
-        <div className="flex flex-1 flex-col">{children}</div>
-        <footer className="border-t border-zinc-200 bg-zinc-50 px-4 py-6 text-center text-xs text-zinc-500">
-          <p className="font-medium text-zinc-700">{BUSINESS_NAME}</p>
-          <p className="mt-1 max-w-md mx-auto">{BUSINESS_TAGLINE}</p>
+        <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+        <footer className="border-t border-zinc-200/70 bg-zinc-50 px-5 py-8 text-center text-[13px] leading-relaxed text-zinc-500">
+          <p className="font-semibold tracking-tight text-zinc-800">{BUSINESS_NAME}</p>
+          <p className="mt-2 max-w-md mx-auto text-zinc-500">{BUSINESS_TAGLINE}</p>
         </footer>
       </body>
     </html>

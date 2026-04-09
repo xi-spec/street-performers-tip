@@ -58,24 +58,35 @@ function CheckoutForm({ artistSlug }: { artistSlug: string }) {
   }
 
   if (checkoutState.type === "loading") {
-    return <p className="text-sm text-zinc-600">Loading secure checkout...</p>;
+    return (
+      <p className="flex items-center gap-2.5 text-[13px] text-zinc-500">
+        <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-200 border-t-blue-500 motion-reduce:animate-none" />
+        Loading secure checkout…
+      </p>
+    );
   }
 
   if (checkoutState.type === "error") {
-    return <p className="text-sm text-red-600">{checkoutState.error.message}</p>;
+    return (
+      <p className="rounded-lg border border-red-100 bg-red-50/80 px-3 py-2 text-[13px] text-red-900">
+        {checkoutState.error.message}
+      </p>
+    );
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-5">
       <label className="block">
-        <span className="mb-2 block text-sm font-medium text-zinc-800">Email</span>
+        <span className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.12em] text-zinc-400">
+          Email
+        </span>
         <input
           type="email"
           required
           autoComplete="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          className="h-12 w-full rounded-xl border border-zinc-300 px-4 text-sm outline-none focus:border-black"
+          className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-3.5 text-[14px] outline-none transition-colors placeholder:text-zinc-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200/60"
           placeholder="you@example.com"
         />
       </label>
@@ -92,23 +103,27 @@ function CheckoutForm({ artistSlug }: { artistSlug: string }) {
           },
         }}
       />
-      <div className="flex gap-3">
+      <div className="flex gap-2.5">
         <button
           type="button"
           onClick={() => router.push(`/${artistSlug}`)}
-          className="h-12 flex-1 rounded-xl border border-zinc-300 bg-white text-sm font-medium text-zinc-900"
+          className="h-11 flex-1 rounded-xl border border-zinc-200 bg-white text-[13px] font-medium text-zinc-800 transition-colors hover:border-zinc-300 hover:bg-zinc-50"
         >
           Back
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="h-12 flex-1 rounded-xl bg-black text-sm font-semibold text-white disabled:opacity-60"
+          className="h-11 flex-1 rounded-xl border border-blue-600/25 bg-blue-600 text-[13px] font-medium text-white shadow-sm transition-[transform,box-shadow] hover:bg-blue-500 disabled:opacity-40"
         >
-          {isSubmitting ? "Processing..." : "Pay now"}
+          {isSubmitting ? "Processing…" : "Pay now"}
         </button>
       </div>
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error ? (
+        <p className="rounded-lg border border-red-100 bg-red-50/80 px-3 py-2 text-[13px] text-red-900">
+          {error}
+        </p>
+      ) : null}
     </form>
   );
 }
@@ -146,7 +161,7 @@ export function ElementsTipCheckout({
 
   if (!stripePromise) {
     return (
-      <p className="text-sm text-red-600">
+      <p className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-[13px] text-zinc-700">
         Missing STRIPE_PUBLISHABLE_KEY (set in env for server; passed from the pay page).
       </p>
     );

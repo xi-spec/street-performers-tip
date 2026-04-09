@@ -1,182 +1,196 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
-import {
-  CENTS_PER_UNIT,
-  CURRENCY_CODE,
-  CURRENCY_SYMBOL,
-  MIN_TIP_AMOUNT_CENTS,
-  SUPPORTED_TIP_AMOUNTS_CENTS,
-} from "@/lib/config";
+import Image from "next/image";
+import { useMemo, useState } from "react";
+import { SUPPORTED_TIP_AMOUNTS_CENTS } from "@/lib/config";
 
 type TipFormProps = {
   artistSlug: string;
   artistName: string;
   tipDescription: string;
+  imageSrc: string;
 };
 
-export function TipForm({ artistSlug, artistName, tipDescription }: TipFormProps) {
-  const [selectedAmountCents, setSelectedAmountCents] = useState<number | null>(null);
-  const [customAmount, setCustomAmount] = useState<string>("");
+function formatEuro(cents: number): string {
+  return new Intl.NumberFormat("en-IE", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(cents / 100);
+}
+
+export function TipForm({ artistSlug, artistName, tipDescription, imageSrc }: TipFormProps) {
+  const [selectedCents, setSelectedCents] = useState<number | null>(null);
+  const [customCents, setCustomCents] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string>("");
-  const [isCustomFocused, setIsCustomFocused] = useState(false);
 
-  const finalAmountCents = useMemo(() => {
-    const customParsed = Number(customAmount);
-    const hasCustom = customAmount.trim().length > 0;
+  const customCentsValue = useMemo(() => {
+    const trimmed = customCents.trim();
+    if (!trimmed) return null;
+    const normalized = trimmed.replace(",", ".");
+    const euros = Number(normalized);
+    if (!Number.isFinite(euros) || euros <= 0) return null;
+    return Math.round(euros * 100);
+  }, [customCents]);
 
-    if (hasCustom && Number.isFinite(customParsed)) {
-      return Math.round(customParsed * CENTS_PER_UNIT);
-    }
+  const amountCents = customCentsValue ?? selectedCents;
 
-    return selectedAmountCents;
-  }, [customAmount, selectedAmountCents]);
-
-  const isValidAmount =
-    typeof finalAmountCents === "number" &&
-    Number.isFinite(finalAmountCents) &&
-    finalAmountCents >= MIN_TIP_AMOUNT_CENTS;
-
-  const isCustomActive = customAmount.trim().length > 0;
-  const isCustomHighlighted = isCustomActive || isCustomFocused;
-
-  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError("");
+    setError(null);
 
-    if (!isValidAmount) {
-      setError("Please enter a valid amount.");
+    if (!amountCents) {
+      setError("Choose an amount or enter a custom tip.");
       return;
     }
 
     setIsSubmitting(true);
-
     try {
       const response = await fetch("/api/checkout", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          artistSlug,
-          amountCents: finalAmountCents,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ artistSlug, amountCents }),
       });
 
-      const data = (await response.json()) as { url?: string; error?: string };
+      const data = (await response.json().catch(() => ({}))) as {
+        url?: string;
+        error?: string;
+      };
 
       if (!response.ok) {
-        setError(
-          data.error ?? "Unable to create checkout. Please try again.",
-        );
-        setIsSubmitting(false);
+        setError(data.error ?? "Could not start checkout. Please try again.");
         return;
       }
 
-      if (!data.url) {
-        setError(
-          data.error ?? "Missing checkout URL. Please try again.",
-        );
-        setIsSubmitting(false);
+      if (data.url) {
+        window.location.href = data.url;
         return;
       }
 
-      window.location.href = data.url;
+      setError("Unexpected response from the server.");
     } catch {
-      setError("Network error. Please try again.");
+      setError("Could not connect. Check your network and try again.");
+    } finally {
       setIsSubmitting(false);
     }
   }
 
   return (
-    <form onSubmit={onSubmit} className="w-full space-y-4">
-      <div className="text-center">
-        <h1 className="text-3xl font-semibold tracking-tight">
-          Tip {artistName}
-        </h1>
-      </div>
-      <p className="text-center text-sm text-zinc-500">{tipDescription}</p>
-
-      <div className="grid grid-cols-3 gap-3">
-        {SUPPORTED_TIP_AMOUNTS_CENTS.map((amountCents) => {
-          const amountInUnits = amountCents / CENTS_PER_UNIT;
-          const isSelected =
-            customAmount.trim().length === 0 &&
-            !isCustomFocused &&
-            selectedAmountCents === amountCents;
-          return (
-            <button
-              key={amountCents}
-              type="button"
-              onClick={() => {
-                setCustomAmount("");
-                setSelectedAmountCents(amountCents);
-              }}
-              className={`h-14 rounded-xl border-2 text-lg font-semibold transition ${
-                isSelected
-                  ? "border-amber-400 bg-black text-white shadow-[0_0_0_2px_rgba(251,191,36,0.25)]"
-                  : "border-zinc-300 bg-white text-zinc-900 hover:border-zinc-400"
-              }`}
-            >
-              {CURRENCY_SYMBOL}
-              {amountInUnits}
-            </button>
-          );
-        })}
-      </div>
-
-      <label className="block">
-        <span className="mb-2 block text-sm font-medium">
-          Custom amount ({CURRENCY_CODE})
-        </span>
-        <div
-          className={`flex h-14 items-stretch overflow-hidden rounded-xl border-2 bg-white transition ${
-            isCustomHighlighted
-              ? "border-amber-400 shadow-[0_0_0_2px_rgba(251,191,36,0.25)]"
-              : "border-zinc-300"
-          }`}
-        >
-          <span
-            className={`flex shrink-0 items-center border-r px-4 text-lg font-semibold tabular-nums ${
-              isCustomHighlighted
-                ? "border-amber-200 bg-amber-50 text-amber-900"
-                : "border-zinc-200 bg-zinc-100 text-zinc-700"
-            }`}
-            aria-hidden
-          >
-            {CURRENCY_SYMBOL}
-          </span>
-          <input
-            type="number"
-            min={MIN_TIP_AMOUNT_CENTS / CENTS_PER_UNIT}
-            step="0.01"
-            inputMode="decimal"
-            value={customAmount}
-            onChange={(event) => {
-              setCustomAmount(event.target.value);
-              setSelectedAmountCents(null);
-            }}
-            onFocus={() => setIsCustomFocused(true)}
-            onBlur={() => setIsCustomFocused(false)}
-            placeholder="0.00"
-            className="min-w-0 flex-1 border-0 bg-transparent px-4 text-right text-xl font-semibold tabular-nums text-zinc-900 outline-none [appearance:textfield] placeholder:text-zinc-400 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-          />
+    <form className="space-y-8" onSubmit={handleSubmit}>
+      <header className="space-y-5 text-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <div className="relative h-28 w-28 overflow-hidden rounded-full border-2 border-white shadow-lg ring-2 ring-blue-400/70">
+              <Image
+                src={imageSrc}
+                alt=""
+                width={112}
+                height={112}
+                className="h-full w-full object-cover"
+                priority
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <span className="inline-flex items-center rounded-full border border-blue-200/90 bg-blue-50 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-blue-700">
+              Live support
+            </span>
+            <h1 className="text-[1.65rem] font-semibold tracking-tight text-zinc-900 sm:text-[1.75rem]">
+              {artistName}
+            </h1>
+            <div className="mx-auto h-0.5 w-14 rounded-full bg-blue-400" />
+            <p className="mx-auto max-w-[22rem] text-[14px] leading-relaxed text-zinc-600">
+              {tipDescription}
+            </p>
+          </div>
         </div>
-        <p className="mt-1.5 text-xs text-zinc-500">
-          Thank you — any amount you choose means a lot.
+      </header>
+
+      <div className="space-y-6">
+        <div className="rounded-2xl border border-zinc-200/80 bg-zinc-50 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+              Suggested amounts
+            </p>
+            <span className="text-[11px] text-zinc-400">EUR</span>
+          </div>
+          <div className="grid grid-cols-3 gap-2.5">
+            {SUPPORTED_TIP_AMOUNTS_CENTS.map((cents) => {
+              const isSelected = selectedCents === cents && customCents.trim() === "";
+              return (
+                <button
+                  key={cents}
+                  type="button"
+                  onClick={() => {
+                    setSelectedCents(cents);
+                    setCustomCents("");
+                    setError(null);
+                  }}
+                  className={[
+                    "rounded-xl border px-2 py-3 text-[15px] font-semibold tracking-tight transition-all duration-200",
+                    isSelected
+                      ? "border-blue-600 bg-blue-50 text-blue-950 shadow-md ring-2 ring-blue-200/90"
+                      : "border-zinc-200/90 bg-white text-zinc-800 shadow-sm hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md active:translate-y-0",
+                  ].join(" ")}
+                >
+                  {formatEuro(cents)}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-sm">
+          <label
+            htmlFor="custom-amount"
+            className="mb-3 block text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400"
+          >
+            Custom amount
+          </label>
+          <div className="relative">
+            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[15px] font-medium text-zinc-400">
+              €
+            </span>
+            <input
+              id="custom-amount"
+              type="text"
+              inputMode="decimal"
+              autoComplete="transaction-amount"
+              placeholder="e.g. 7.50"
+              value={customCents}
+              onChange={(e) => {
+                setCustomCents(e.target.value);
+                setSelectedCents(null);
+                setError(null);
+              }}
+              className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 py-3.5 pl-9 pr-4 text-[17px] font-medium tracking-tight text-zinc-900 shadow-inner outline-none transition-[border-color,box-shadow,background-color] placeholder:text-zinc-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-200/50"
+            />
+          </div>
+          <p className="mt-3 text-[12px] leading-relaxed text-zinc-500">
+            Every bit helps — pick what feels right today.
+          </p>
+        </div>
+      </div>
+
+      {error ? (
+        <p className="rounded-xl border border-red-200/90 bg-red-50 px-4 py-3 text-center text-[13px] text-red-800">
+          {error}
         </p>
-      </label>
+      ) : null}
 
       <button
         type="submit"
         disabled={isSubmitting}
-        className="h-14 w-full rounded-xl bg-black text-base font-semibold text-white disabled:opacity-60"
+        className="flex h-14 w-full items-center justify-center rounded-xl border border-blue-600/25 bg-blue-600 text-[15px] font-semibold text-white shadow-[0_1px_0_rgba(255,255,255,0.2)_inset,0_8px_24px_-10px_rgba(37,99,235,0.45)] transition-[transform,box-shadow,opacity] hover:-translate-y-0.5 hover:bg-blue-500 hover:shadow-[0_1px_0_rgba(255,255,255,0.25)_inset,0_12px_28px_-12px_rgba(37,99,235,0.5)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
       >
-        {isSubmitting ? "Redirecting..." : "Support"}
+        {isSubmitting ? "Opening secure checkout…" : "Continue to payment"}
       </button>
 
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      <p className="text-center text-[11px] leading-relaxed text-zinc-400">
+        Powered by Stripe · encrypted · your card is not stored here
+      </p>
     </form>
   );
 }
