@@ -12,10 +12,9 @@ import {
 type ElementsTipCheckoutProps = {
   artistSlug: string;
   amountCents: number;
+  /** Passed from a Server Component; reads `process.env.STRIPE_PUBLISHABLE_KEY`. */
+  stripePublishableKey: string;
 };
-
-const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "";
-const stripePromise = publishableKey ? loadStripe(publishableKey) : null;
 
 function CheckoutForm({ artistSlug }: { artistSlug: string }) {
   const router = useRouter();
@@ -117,7 +116,13 @@ function CheckoutForm({ artistSlug }: { artistSlug: string }) {
 export function ElementsTipCheckout({
   artistSlug,
   amountCents,
+  stripePublishableKey,
 }: ElementsTipCheckoutProps) {
+  const stripePromise = useMemo(
+    () => (stripePublishableKey ? loadStripe(stripePublishableKey) : null),
+    [stripePublishableKey],
+  );
+
   const options = useMemo(
     () => ({
       clientSecret: fetch("/api/checkout/elements", {
@@ -142,7 +147,7 @@ export function ElementsTipCheckout({
   if (!stripePromise) {
     return (
       <p className="text-sm text-red-600">
-        Missing NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.
+        Missing STRIPE_PUBLISHABLE_KEY (set in env for server; passed from the pay page).
       </p>
     );
   }
