@@ -31,7 +31,7 @@ const artists: Artist[] = [
       },
       {
         label: "Instagram",
-        href: "https://www.instagram.com/limona.li/",
+        href: "https://www.instagram.com/limona_liiii/",
       },
 
       {
