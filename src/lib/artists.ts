@@ -8,6 +8,8 @@ export type Artist = {
   name: string;
   stripeAccountId: string;
   tipDescription: string;
+  /** Public image URL under `/public`, e.g. `/artists/limona.jpg`. */
+  imageSrc?: string;
   /** Optional custom message shown on the success page after payment. */
   successDescription?: string;
   /** Optional links for the post-payment “Know me” section. */
